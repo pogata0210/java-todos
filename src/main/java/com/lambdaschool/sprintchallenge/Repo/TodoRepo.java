@@ -23,4 +23,7 @@ public interface TodoRepo extends JpaRepository<Todo, Integer>
     List<Todo> getUserTodos(@Param("userid") int userid);
 
 
+    Todo findByTodoid(Integer todoid);
+
+    List<Object[]> todosWithUserOrderedByDateStarted();
 }

@@ -93,6 +93,22 @@ public class TodoController {
         }
         return null;
     }
+    @GetMapping("/todos/todoid/{todoid}")
+    public Todo getTodoBasedOffTodoId(@PathVariable Integer todoid){
+        return todoRepository.findByTodoid(todoid);
+    }
+
+    @ApiOperation(value = "Gets a list of todo tasks assigned to each user", response = List.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved list"),
+            @ApiResponse(code = 401, message = "You are not authorized to the view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @GetMapping("/todos/users")
+    public List<Object[]> getTodoWithAssignedUser() {
+        return todoRepository.todosWithUserOrderedByDateStarted();
+    }
 
     @ApiOperation(value = "Deletes a user with given userid", response = List.class)
     @ApiResponses(value = {
@@ -105,8 +121,8 @@ public class TodoController {
     public User deleteUserByID(@PathVariable int userid) {
         var foundUser = userRepository.findById(userid);
         if (foundUser.isPresent()) {
-            List<Todo> todosFromUser = todoRepository.getUserTodos(userid);
-            for (Todo todo : todosFromUser) {
+            List<Todo> todoFromUser = todoRepository.getUserTodos(userid);
+            for (Todo todo : todoFromUser) {
                 todoRepository.deleteById(todo.getTodoid());
             }
             userRepository.deleteById(userid);
@@ -125,4 +141,46 @@ public class TodoController {
         }
         return null;
     }
+    @ApiOperation(value = "Adds a user", response = List.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully added"),
+            @ApiResponse(code = 401, message = "You are not authorized to the view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @PostMapping("/users")
+    public User addANewUser(@RequestBody User users) throws URISyntaxException{
+        return userRepository.save(users);
+    }
+
+    @ApiOperation(value = "Adds a todo task", response = List.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully added"),
+            @ApiResponse(code = 401, message = "You are not authorized to the view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @PostMapping("/todos")
+    public Todo addANewTodo(@RequestBody Todo todo) throws URISyntaxException {
+        return todoRepository.save(todo);
+    }
+
+    @ApiOperation(value = "Updatuser id", response = List.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully updated"),
+            @ApiResponse(code = 401, message = "You are not authorized to the view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @PutMapping("/users/userid/{userid}")
+    public User updateUser(@RequestBody User newUser, @PathVariable Integer userid) throws URISyntaxException{
+        Optional<User> userUpdate = userRepository.findById(userid);
+        if(userUpdate.isPresent()){
+            newUser.setUserid(userid);
+            userRepository.save(newUser);
+            return newUser;
+        }
+        return null;
+    }
+
 }
