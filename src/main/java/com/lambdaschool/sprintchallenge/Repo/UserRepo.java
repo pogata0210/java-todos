@@ -8,4 +8,6 @@ public interface UserRepo extends JpaRepository<User, Integer>
 
 {
      User findByUsernameIgnoreCase(String username);
+
+     User findByUsername(String username);
 }
